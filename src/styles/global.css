@@ -1,0 +1,94 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+/* Self-hosted via @fontsource (bundled at build time, no runtime CDN link) */
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/500-italic.css";
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+
+/* Expose the CSS-variable tokens as Tailwind utilities (bg-canvas, text-brand, ...) */
+@theme inline {
+  --color-canvas: var(--surface-canvas);
+  --color-card: var(--surface-card);
+  --color-card-strong: var(--surface-card-strong);
+  --color-ink: var(--text-primary);
+  --color-ink-soft: var(--text-secondary);
+  --color-brand: var(--text-brand);
+  --color-on-accent: var(--text-on-accent);
+  --color-on-brand: var(--text-on-brand);
+  --color-accent: var(--accent-fill);
+  --color-link: var(--link);
+  --color-border-subtle: var(--border-subtle);
+  --color-danger: var(--danger);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+
+  --text-hero: var(--text-hero);
+  --text-h2: var(--text-h2);
+  --text-h3: var(--text-h3);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-pill: var(--radius-pill);
+}
+
+/*
+  Wrapped in Tailwind's own `base` layer (not left unlayered) so that
+  utility classes like `text-ink` on an <a> or <h2> correctly win over
+  these defaults. Cascade layers ignore specificity across layers —
+  an unlayered rule beats ANY layered utility regardless of selector
+  weight, which is what silently broke nav-link colors in dark mode
+  before this fix (they kept falling back to `a { color: var(--link) }`
+  instead of the `.text-ink` class applied to them).
+*/
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: var(--surface-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    color: var(--text-brand);
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  a {
+    color: var(--link);
+  }
+
+  img, svg {
+    max-width: 100%;
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

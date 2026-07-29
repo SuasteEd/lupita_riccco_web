@@ -1,0 +1,133 @@
+rules_version = '2';
+
+// LupitaRiccco es un solo local: la app se autentica con una sesión
+// técnica por dispositivo (Firebase Auth anónimo), no una cuenta por
+// empleado — el PIN de negocio vive solo en la app (ver AuthLocalDataSource).
+// Por eso la regla es simple: cualquier dispositivo autenticado de la app
+// puede leer/escribir todas las colecciones. Los permisos por rol
+// (Admin/Empleado) se validan en la capa de dominio de la app, no aquí.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+
+    /*
+      Añadido puro sobre la regla de arriba, no la reemplaza: la app
+      Flutter sigue teniendo acceso total a "web_order_requests" igual
+      que a cualquier otra colección (misma regla `request.auth != null`
+      de siempre). Esto SOLO agrega la posibilidad de que la landing web
+      pública (sin ningún login, ni siquiera anónimo) cree una solicitud
+      nueva, validando la forma exacta del documento para rechazar
+      escrituras manipuladas a mano desde la consola del navegador o con
+      una llamada directa al SDK (sin pasar por el wizard de React).
+      No se agrega permiso de leer/editar/borrar sin auth: eso ya está
+      cubierto (o bloqueado) por la regla general de arriba.
+
+      Zona de riesgo aceptada, documentada aquí a propósito: estas reglas
+      validan FORMA y COTAS del documento, no el árbol completo de reglas
+      de negocio condicionales de src/config/cakeRules.ts (ej. no verifican
+      que "esTresLeches" solo sea true si forma es "rectangular", ni que
+      "tamano" y "forma" sean una combinación real). Replicar ese árbol
+      completo aquí sería fragile y quedaría desincronizado del archivo
+      real cada vez que cambien las reglas de negocio. El peor caso de
+      alguien saltándose el wizard es un pedido con una combinación sin
+      sentido — el negocio lo ve pendiente de revisar y lo rechaza, no es
+      una fuga de datos ni un compromiso de la cuenta.
+    */
+    match /web_order_requests/{orderId} {
+      allow create: if isValidNewOrder(request.resource.data);
+    }
+
+    function tamanosValidos() {
+      return ['mini', '4', '8', '10', '15', '20', '30', '40', '50', '60', '70', '80', '+100', '100'];
+    }
+
+    function saboresValidos() {
+      return ['Red Velvet', 'Café', 'Zanahoria', 'Marmoleado', 'Vainilla', 'Chocolate', 'Fresa', 'Nuez'];
+    }
+
+    function rellenosValidos() {
+      return [
+        'Queso/Zarzamora', 'Crema de café', 'Crema pastelera', 'Ferrero Rocher', 'Fresa',
+        'Mermelada de fresa', 'Durazno', 'Oreo', 'Dulce de leche y nuez', 'Nutella'
+      ];
+    }
+
+    function isValidNewOrder(data) {
+      return
+        // Ningún campo fuera de este set exacto — sin esto, alguien podría
+        // agregar claves arbitrarias al documento (spam de almacenamiento,
+        // o intentar confundir la app admin con datos inesperados) aunque
+        // el resto del documento sea válido.
+        data.keys().hasOnly([
+          'createdAt', 'status', 'cliente', 'pastel', 'empaque', 'extras',
+          'imagenReferencia', 'fechaEntrega', 'comentarios',
+          'precioFinal', 'notaAdmin', 'fechaResolucion'
+        ]) &&
+
+        data.status == 'pending' &&
+        data.createdAt == request.time &&
+        data.precioFinal == null &&
+        data.notaAdmin == null &&
+        data.fechaResolucion == null &&
+        // Ventana de entrega tiene que ser a futuro — el mínimo de días
+        // exacto (3 o 5) es cosmético del formulario, pero "no en el
+        // pasado" sí se exige aquí como último resguardo.
+        data.fechaEntrega is timestamp &&
+        data.fechaEntrega > request.time &&
+
+        data.cliente is map &&
+        data.cliente.keys().hasOnly(['nombre', 'telefono', 'direccion', 'email']) &&
+        data.cliente.nombre is string &&
+        data.cliente.nombre.size() > 0 && data.cliente.nombre.size() < 120 &&
+        data.cliente.telefono is string &&
+        // México ("+521" + 10 dígitos, formato wa.me) o Estados Unidos
+        // ("+1" + 10 dígitos, NANP) — los dos países que puede elegir el
+        // formulario web.
+        data.cliente.telefono.matches('^\\+521[0-9]{10}$|^\\+1[0-9]{10}$') &&
+        data.cliente.direccion is string &&
+        data.cliente.direccion.size() > 0 && data.cliente.direccion.size() < 300 &&
+        (data.cliente.email == null ||
+          (data.cliente.email is string && data.cliente.email.size() < 200)) &&
+
+        data.pastel is map &&
+        data.pastel.keys().hasOnly([
+          'forma', 'esPisos', 'tamano', 'personas', 'esTresLeches', 'sabor', 'relleno', 'cobertura'
+        ]) &&
+        data.pastel.forma in ['circular', 'corazon', 'rectangular'] &&
+        data.pastel.esPisos is bool &&
+        data.pastel.tamano is string && data.pastel.tamano in tamanosValidos() &&
+        data.pastel.personas is number &&
+        data.pastel.personas > 0 && data.pastel.personas <= 1000 &&
+        data.pastel.esTresLeches is bool &&
+        data.pastel.sabor is string && data.pastel.sabor in saboresValidos() &&
+        data.pastel.relleno is string && data.pastel.relleno in rellenosValidos() &&
+        data.pastel.cobertura in ['chantilly', 'queso_crema', 'buttercream'] &&
+
+        data.empaque is map &&
+        data.empaque.keys().hasOnly(['tipo']) &&
+        data.empaque.tipo in ['carton_dorado', 'caja_acetato'] &&
+
+        // No se valida la forma de cada elemento (Firestore Rules no
+        // itera listas con una condición por elemento de forma práctica),
+        // solo se acota el tamaño para que no sea un vector de relleno de
+        // almacenamiento.
+        data.extras is list && data.extras.size() <= 10 &&
+
+        // Sin Firebase Storage en este MVP: la imagen se sube directo a
+        // Cloudinary (unsigned upload) desde el cliente, y aquí solo se
+        // guarda el secure_url resultante. Se exige que venga DEL cloud
+        // name real del proyecto (bdeo51wl), no de cualquier cuenta de
+        // Cloudinary — si no, alguien podría meter la URL de una imagen
+        // ajena (potencialmente ofensiva) para que la vea el negocio.
+        (data.imagenReferencia == null ||
+          (data.imagenReferencia is string &&
+            data.imagenReferencia.matches('^https://res\\.cloudinary\\.com/bdeo51wl/image/upload/.*') &&
+            data.imagenReferencia.size() < 500)) &&
+
+        (data.comentarios == null ||
+          (data.comentarios is string && data.comentarios.size() < 1000));
+    }
+  }
+}

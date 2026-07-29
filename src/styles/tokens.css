@@ -1,0 +1,111 @@
+/*
+  Lupita Riccco — Design tokens
+  ------------------------------------------------------------------
+  These four RAW values are the ONLY things you should ever need to
+  edit to reskin the entire site with a new palette. Every component
+  reads semantic tokens further down, which are derived from these.
+
+  Contrast notes (WCAG AA), measured against these exact hex values:
+  - #1A1A1A on #F7F4EA............ 15.8:1  (safe for any text size)
+  - #5C6B3D on #F7F4EA............  5.3:1  (safe for body text)
+  - #5C6B3D on #1A1A1A............  3.0:1  (large text / headings ONLY, ≥24px or ≥19px bold)
+  - #E8D84A on #F7F4EA............  1.3:1  (FAILS — never use lemon as text on cream)
+  - #E8D84A on #1A1A1A............ 11.9:1  (safe as text/links, dark mode only)
+  This is why lemon is treated as a decorative-fill accent in light mode,
+  and can additionally carry small text/links in dark mode.
+*/
+
+:root {
+  /* Raw brand tokens — edit these four to reskin the whole site */
+  --color-primary: #5c6b3d;    /* olive — brand ink, headings, logo */
+  --color-background: #f7f4ea; /* cream/ivory — page background */
+  --color-accent: #e8d84a;     /* lemon — sparing decorative accent only */
+  --color-dark: #1a1a1a;       /* near-black — borders, high-contrast text */
+
+  /* Typography tokens */
+  --font-display: "Playfair Display", "Iowan Old Style", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+
+  --text-hero: clamp(2.5rem, 5vw + 1rem, 4.25rem);
+  --text-h2: clamp(2rem, 3vw + 1rem, 3rem);
+  --text-h3: clamp(1.375rem, 1.5vw + 1rem, 1.75rem);
+  --text-body: 1.0625rem;
+  --text-small: 0.9375rem;
+
+  /* Shape — one radius scale for the whole page (Shape Consistency Lock) */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-pill: 999px;
+
+  /* Motion (MOTION_INTENSITY: 4 — fluid CSS, no cinematic choreography) */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 0.2s;
+  --duration-standard: 0.4s;
+
+  /* Semantic tokens — light mode (default) */
+  --surface-canvas: var(--color-background);
+  --surface-card: color-mix(in srgb, var(--color-background) 92%, var(--color-dark) 8%);
+  --surface-card-strong: color-mix(in srgb, var(--color-background) 84%, var(--color-primary) 16%);
+  --text-primary: var(--color-dark);
+  --text-secondary: color-mix(in srgb, var(--color-dark) 66%, var(--color-background) 34%);
+  --text-brand: var(--color-primary);
+  --text-on-accent: var(--color-dark);
+  --border-subtle: color-mix(in srgb, var(--color-dark) 14%, transparent);
+  --link: var(--color-primary);
+  --accent-fill: var(--color-accent);
+
+  /* Fixed pairs — intentionally do NOT flip with the theme, because they
+     are always painted on top of a raw brand color (e.g. text on a button
+     filled with --color-primary), so they must stay constant in both
+     modes. --color-primary on --color-background is 5.3:1 in either mode. */
+  --text-on-brand: var(--color-background);
+
+  /* Functional error color for form validation — NOT a brand accent, so it
+     sits outside the Color Consistency Lock (semantic UI state, not brand
+     expression). #A6402F on #F7F4EA is 5.1:1 (safe for body text). */
+  --danger: #a6402f;
+}
+
+/*
+  Dark mode reuses the same four brand tokens, no invented colors —
+  "cafetería al anochecer": near-black canvas, cream ink, olive for large
+  headings (3:1, AA-large), lemon for links/small accents (11.9:1, AA for
+  any size). Brand stays recognisable, per skill 8.B.
+
+  Applied two ways so both "system preference" and a manual toggle work:
+  1. `prefers-color-scheme: dark` — respected automatically, unless the
+     user has explicitly picked light via the toggle (data-theme="light").
+  2. `[data-theme="dark"]` — the manual toggle (Header) sets this
+     attribute on <html> and it wins regardless of system preference.
+  index.html has a tiny inline script that applies the stored/system
+  choice before first paint, so there's no light/dark flash on load.
+*/
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --surface-canvas: var(--color-dark);
+    --surface-card: color-mix(in srgb, var(--color-dark) 88%, white 12%);
+    --surface-card-strong: color-mix(in srgb, var(--color-dark) 78%, var(--color-primary) 22%);
+    --text-primary: var(--color-background);
+    --text-secondary: color-mix(in srgb, var(--color-background) 72%, var(--color-dark) 28%);
+    --text-brand: var(--color-primary);
+    --text-on-accent: var(--color-dark);
+    --border-subtle: color-mix(in srgb, var(--color-background) 16%, transparent);
+    --link: var(--color-accent);
+    --accent-fill: var(--color-accent);
+    --danger: #e2725b; /* 5.6:1 on #1A1A1A */
+  }
+}
+
+:root[data-theme='dark'] {
+  --surface-canvas: var(--color-dark);
+  --surface-card: color-mix(in srgb, var(--color-dark) 88%, white 12%);
+  --surface-card-strong: color-mix(in srgb, var(--color-dark) 78%, var(--color-primary) 22%);
+  --text-primary: var(--color-background);
+  --text-secondary: color-mix(in srgb, var(--color-background) 72%, var(--color-dark) 28%);
+  --text-brand: var(--color-primary);
+  --text-on-accent: var(--color-dark);
+  --border-subtle: color-mix(in srgb, var(--color-background) 16%, transparent);
+  --link: var(--color-accent);
+  --accent-fill: var(--color-accent);
+  --danger: #e2725b;
+}

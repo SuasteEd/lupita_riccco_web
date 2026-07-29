@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lupita Riccco – Cafetería, repostería</title>
+    <meta name="description" content="Cafetería, repostería" />
+
+    <meta property="og:title" content="Lupita Riccco – Cafetería, repostería" />
+    <meta property="og:description" content="Cafetería, repostería" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/logo.png" />
+    <!-- TODO: reemplazar og:image por una foto real del local o de un producto insignia (1200x630) cuando esté disponible -->
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Lupita Riccco – Cafetería, repostería" />
+    <meta name="twitter:description" content="Cafetería, repostería" />
+    <meta name="twitter:image" content="/logo.png" />
+
+    <script>
+      // Applies the saved/system light-dark choice before first paint,
+      // so switching pages or reloading never flashes the wrong theme.
+      (function () {
+        var stored = localStorage.getItem('lr-theme');
+        var theme =
+          stored === 'light' || stored === 'dark'
+            ? stored
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
