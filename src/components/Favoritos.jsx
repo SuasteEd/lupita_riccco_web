@@ -1,11 +1,69 @@
 import { motion, useReducedMotion } from 'motion/react'
-import { Cookie, Sparkle, Heart } from '@phosphor-icons/react'
-import ImagePlaceholder from './ImagePlaceholder.jsx'
 
+/*
+  Fotos reales del negocio, alojadas en Cloudinary (cloud_name bdeo51wl).
+  Cada una se eligió como la mejor toma disponible de ese producto entre
+  varias opciones — ver conversación para el resto del set si se necesita
+  variar alguna más adelante.
+*/
 const FAVORITOS = [
-  { name: 'Chocolate', Icon: Cookie, note: 'Foto real del pastel de chocolate, corte mostrando el relleno.' },
-  { name: 'Zarzamora', Icon: Sparkle, note: 'Foto real del pastel de zarzamora.' },
-  { name: 'Red Velvet', Icon: Heart, note: 'Foto real del pastel red velvet.' },
+  {
+    name: 'Helados en forma de fruta',
+    note: 'Los únicos en la comunidad que los hacen.',
+    img: 'https://res.cloudinary.com/bdeo51wl/image/upload/v1785436781/4_tj16b8.jpg',
+    alt: 'Postres helados con forma y color de fruta real, sobre platitos individuales',
+    span: 'md:col-span-2 md:row-span-2',
+    aspect: 'aspect-square md:aspect-auto md:h-full',
+  },
+  {
+    name: 'Queso y zarzamora',
+    img: 'https://res.cloudinary.com/bdeo51wl/image/upload/v1785436789/23_r38ldx.jpg',
+    alt: 'Rebanada de pastel de queso y zarzamora siendo levantada del pastel completo',
+    span: 'md:col-span-2',
+    aspect: 'aspect-[4/3]',
+  },
+  {
+    name: 'Pastel desnudo relleno de frutas (redondo)',
+    img: 'https://res.cloudinary.com/bdeo51wl/image/upload/v1785436786/13_w253f9.jpg',
+    alt: 'Pastel desnudo redondo relleno de frutas, cubierto de moras frescas',
+    span: 'md:col-span-1',
+    aspect: 'aspect-[4/5]',
+  },
+  {
+    name: 'Pastel desnudo relleno de frutas (rectangular)',
+    img: 'https://res.cloudinary.com/bdeo51wl/image/upload/v1785436787/14_cesbid.jpg',
+    alt: 'Pastel desnudo rectangular relleno de frutas, cubierto de moras frescas',
+    span: 'md:col-span-1',
+    aspect: 'aspect-[4/5]',
+  },
+  {
+    name: 'Zanahoria',
+    img: 'https://res.cloudinary.com/bdeo51wl/image/upload/v1785436789/25_wxsemf.jpg',
+    alt: 'Rebanada de pastel de zanahoria decorada con una zanahoria de betún',
+    span: 'md:col-span-1',
+    aspect: 'aspect-[4/5]',
+  },
+  {
+    name: 'Chocolate',
+    img: 'https://res.cloudinary.com/bdeo51wl/image/upload/v1785436790/24_ubm383.jpg',
+    alt: 'Rebanada de pastel de chocolate con relleno de ganache',
+    span: 'md:col-span-1',
+    aspect: 'aspect-[4/5]',
+  },
+  {
+    name: 'Cheesecake',
+    img: 'https://res.cloudinary.com/bdeo51wl/image/upload/v1785436781/8_pljgfx.jpg',
+    alt: 'Tres cheesecakes individuales, con frutos rojos y con caramelo',
+    span: 'md:col-span-1',
+    aspect: 'aspect-[4/5]',
+  },
+  {
+    name: 'Fresas con crema',
+    img: 'https://res.cloudinary.com/bdeo51wl/image/upload/v1785436781/2_tgg0xm.jpg',
+    alt: 'Dos vasos de fresas con crema en capas',
+    span: 'md:col-span-1',
+    aspect: 'aspect-[4/5]',
+  },
 ]
 
 export default function Favoritos() {
@@ -20,45 +78,30 @@ export default function Favoritos() {
         viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        ¡Los favoritos!
+        Nuestros favoritos
       </motion.h2>
-      <p className="mt-3 max-w-md text-ink-soft">
-        Los tres sabores que más piden en la tienda.
-      </p>
+      <p className="mt-3 max-w-md text-ink-soft">Lo que más piden en la tienda.</p>
 
-      <div className="mt-10 grid gap-5 md:grid-cols-2">
-        <motion.div
-          initial={reduce ? false : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="group md:row-span-2"
-        >
-          <ImagePlaceholder
-            Icon={FAVORITOS[0].Icon}
-            iconSize={64}
-            className="aspect-[4/5] w-full transition-transform duration-300 group-hover:-translate-y-1 md:aspect-auto md:h-full"
-            note={FAVORITOS[0].note}
-          />
-          <p className="mt-3 font-display text-h3 text-brand">{FAVORITOS[0].name}</p>
-        </motion.div>
-
-        {FAVORITOS.slice(1).map((item, i) => (
+      <div className="mt-10 grid grid-flow-dense gap-5 md:grid-cols-4">
+        {FAVORITOS.map((item, i) => (
           <motion.div
             key={item.name}
             initial={reduce ? false : { opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.5, delay: 0.08 * (i + 1), ease: [0.16, 1, 0.3, 1] }}
-            className="group"
+            transition={{ duration: 0.5, delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] }}
+            className={`group flex flex-col ${item.span ?? ''}`}
           >
-            <ImagePlaceholder
-              Icon={item.Icon}
-              iconSize={48}
-              className="aspect-[4/3] w-full transition-transform duration-300 group-hover:-translate-y-1"
-              note={item.note}
-            />
+            <div className={`overflow-hidden rounded-md ${item.aspect} md:flex-1`}>
+              <img
+                src={item.img}
+                alt={item.alt}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              />
+            </div>
             <p className="mt-3 font-display text-h3 text-brand">{item.name}</p>
+            {item.note && <p className="text-sm text-ink-soft">{item.note}</p>}
           </motion.div>
         ))}
       </div>

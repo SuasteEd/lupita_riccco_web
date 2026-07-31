@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: '#favoritos', label: 'Favoritos' },
   { href: '#temporada', label: 'De temporada' },
   { href: '#canela', label: 'Roles de canela' },
+  { href: '#bebidas', label: 'Bebidas' },
   { href: '#contacto', label: 'Contacto' },
 ]
 

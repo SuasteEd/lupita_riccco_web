@@ -8,15 +8,12 @@
 
   Decisiones registradas explícitamente (confirmadas con el negocio):
   - "personas" se deriva 1:1 del tamaño elegido, nunca es un campo libre.
-  - El "grupo chico" de sabor/relleno es tamaño ∈ {mini, 4, 8, 10}. El
-    catálogo "clásico" completo aplica desde tamaño 15 en adelante
-    (equivalente a personas > 10, sin huecos).
+  - El "grupo chico" de sabor/relleno es tamaño ∈ {mini, 4, 8}. El
+    catálogo "clásico" completo aplica desde tamaño 10 en adelante.
   - tamaño "mini" → personas: 1 · tamaño "+100" → personas: 100.
     Son pisos conservadores solo para evaluar umbrales; el tamaño real
     elegido se guarda tal cual en el pedido para que el admin lo vea.
-  - Cobertura fija en queso crema para tamaño ∈ {mini, 4, 8} (ojo: sin el
-    "10" que sí entra en el grupo chico de sabor/relleno arriba — son
-    umbrales distintos, confirmados por separado con el negocio).
+  - Cobertura fija en queso crema para tamaño ∈ {mini, 4, 8}.
   - Pisos (tiered) NUNCA disponible en forma rectangular — un rectangular
     siempre es de un solo piso. Pisos solo aplica a circular/corazón con
     más de 20 personas.
@@ -54,13 +51,12 @@ export function personasDeTamano(tamano: string): number {
   return n
 }
 
-const TAMANOS_GRUPO_CHICO = new Set(['mini', '4', '8', '10'])
-/** Distinto del grupo chico de sabor/relleno: aquí NO entra "10", solo mini/4/8. */
+const TAMANOS_GRUPO_CHICO = new Set(['mini', '4', '8'])
 const TAMANOS_COBERTURA_FIJA = new Set(['mini', '4', '8'])
 
 /** Rectangular es siempre de un piso — pisos solo aplica a circular/corazón. */
 export function isPisosDisponible(forma: Forma, personas: number): boolean {
-  return forma !== 'rectangular' && personas > 20
+  return forma !== 'rectangular' && personas > 20 
 }
 
 export function isTresLechesDisponible(forma: Forma, personas: number, esPisos: boolean): boolean {

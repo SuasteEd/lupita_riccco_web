@@ -5,6 +5,7 @@ import Historia from './components/Historia.jsx'
 import Favoritos from './components/Favoritos.jsx'
 import DeTemporada from './components/DeTemporada.jsx'
 import RolesDeCanela from './components/RolesDeCanela.jsx'
+import Bebidas from './components/Bebidas.jsx'
 import Footer from './components/Footer.jsx'
 
 // Carga diferida: el SDK de Firebase (~800 KB) solo se descarga cuando el
@@ -26,6 +27,7 @@ function App() {
         <Favoritos />
         <DeTemporada />
         <RolesDeCanela />
+        <Bebidas />
       </main>
       <Footer />
       {orderFormOpen && (

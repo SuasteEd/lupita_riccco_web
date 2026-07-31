@@ -22,6 +22,15 @@
   --color-accent: #e8d84a;     /* lemon — sparing decorative accent only */
   --color-dark: #1a1a1a;       /* near-black — borders, high-contrast text */
 
+  /* One deliberate 5th color, scoped to a single section: the real pan de
+     muerto photos are dominated by cempasúchil orange and wood tones
+     (sampled from the actual photography: #b15f35, #ad5224, #e08018,
+     #a15b3e), which clash against an olive-tinted background. This is
+     tied to Día de Muertos itself, not the core brand palette, so it
+     lives as its own token — edit it independently if the seasonal
+     photos ever change. Used only for --surface-temporada below. */
+  --color-temporada: #b3672f;
+
   /* Typography tokens */
   --font-display: "Playfair Display", "Iowan Old Style", Georgia, serif;
   --font-body: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
@@ -46,6 +55,13 @@
   --surface-canvas: var(--color-background);
   --surface-card: color-mix(in srgb, var(--color-background) 92%, var(--color-dark) 8%);
   --surface-card-strong: color-mix(in srgb, var(--color-background) 84%, var(--color-primary) 16%);
+  /* Terracota tenue para "De temporada" (pan de muerto) — armoniza con el
+     naranja de cempasúchil de las fotos reales en vez de chocar con él. */
+  --surface-temporada: color-mix(in srgb, var(--color-background) 88%, var(--color-temporada) 12%);
+  /* Miel tenue para "Roles de canela" — las fotos reales son tonos
+     caramelo/ámbar, reutiliza el acento limón (ya existente) en vez de
+     inventar un color nuevo. */
+  --surface-canela: color-mix(in srgb, var(--color-background) 90%, var(--color-accent) 10%);
   --text-primary: var(--color-dark);
   --text-secondary: color-mix(in srgb, var(--color-dark) 66%, var(--color-background) 34%);
   --text-brand: var(--color-primary);
@@ -85,6 +101,8 @@
     --surface-canvas: var(--color-dark);
     --surface-card: color-mix(in srgb, var(--color-dark) 88%, white 12%);
     --surface-card-strong: color-mix(in srgb, var(--color-dark) 78%, var(--color-primary) 22%);
+    --surface-temporada: color-mix(in srgb, var(--color-dark) 88%, var(--color-temporada) 12%);
+    --surface-canela: color-mix(in srgb, var(--color-dark) 90%, var(--color-accent) 10%);
     --text-primary: var(--color-background);
     --text-secondary: color-mix(in srgb, var(--color-background) 72%, var(--color-dark) 28%);
     --text-brand: var(--color-primary);
@@ -100,6 +118,8 @@
   --surface-canvas: var(--color-dark);
   --surface-card: color-mix(in srgb, var(--color-dark) 88%, white 12%);
   --surface-card-strong: color-mix(in srgb, var(--color-dark) 78%, var(--color-primary) 22%);
+  --surface-temporada: color-mix(in srgb, var(--color-dark) 88%, var(--color-temporada) 12%);
+  --surface-canela: color-mix(in srgb, var(--color-dark) 90%, var(--color-accent) 10%);
   --text-primary: var(--color-background);
   --text-secondary: color-mix(in srgb, var(--color-background) 72%, var(--color-dark) 28%);
   --text-brand: var(--color-primary);

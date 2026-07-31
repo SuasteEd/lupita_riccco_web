@@ -1,6 +1,4 @@
 import { motion, useReducedMotion } from 'motion/react'
-import { Storefront } from '@phosphor-icons/react'
-import ImagePlaceholder from './ImagePlaceholder.jsx'
 
 export default function Hero({ onOpenOrderForm }) {
   const reduce = useReducedMotion()
@@ -13,7 +11,7 @@ export default function Hero({ onOpenOrderForm }) {
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
         <h1 className="font-display text-hero font-medium text-brand">
-          Bienvenida a Lupita Riccco
+          Bienvenidos a Lupita Riccco
         </h1>
         <p className="mt-5 max-w-md text-ink-soft">
           Cafetería y repostería artesanal en Los Rodríguez. Pasteles, pan de
@@ -41,13 +39,16 @@ export default function Hero({ onOpenOrderForm }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
       >
-        <ImagePlaceholder
-          Icon={Storefront}
-          iconSize={72}
-          className="aspect-[4/5] w-full"
-          note="Foto o ilustración de línea del local o del pastel insignia, en el estilo de la portada de WhatsApp (manos brindando con pastel y bebida)."
-        />
+        <div className="aspect-[4/5] w-full overflow-hidden rounded-md border border-border-subtle bg-canvas">
+          <img
+            src="https://res.cloudinary.com/bdeo51wl/image/upload/v1785516721/Portada_xupow7.jpg"
+            alt="Ilustración de línea de dos manos brindando, una con una rebanada de pastel y otra con una bebida fría"
+            className="h-full w-full object-cover"
+          />
+        </div>
       </motion.div>
     </section>
   )
 }
+
+
