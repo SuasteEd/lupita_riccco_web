@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "lupitaricco-cd9f9"
-  }
+    "default": "lupitaricco-cd9f9",
+    "lupitaRiccco": "lupitaricco-cd9f9"
+  },
+  "targets": {},
+  "etags": {}
 }

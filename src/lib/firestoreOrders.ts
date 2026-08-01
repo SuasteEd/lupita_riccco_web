@@ -1,6 +1,9 @@
 import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore'
 import { db } from '../config/firebase'
 import { personasDeTamano } from '../config/cakeRules'
+import type { BusinessRulesConfig } from '../config/businessRulesDefault'
+import type { CakePricesDocument } from '../config/cakePrices'
+import { calculateEstimate } from '../config/pricing'
 import { normalizePhone } from './phone'
 import type { OrderDraft } from '../types/order'
 
@@ -12,7 +15,11 @@ import type { OrderDraft } from '../types/order'
 */
 export const ORDERS_COLLECTION = 'web_order_requests'
 
-export async function submitOrder(draft: OrderDraft): Promise<string> {
+export async function submitOrder(
+  draft: OrderDraft,
+  config: BusinessRulesConfig,
+  pricesDoc: CakePricesDocument | null,
+): Promise<string> {
   if (!draft.forma || !draft.tamano || !draft.sabor || !draft.relleno || !draft.cobertura) {
     throw new Error('Faltan campos obligatorios del pastel.')
   }
@@ -25,6 +32,12 @@ export async function submitOrder(draft: OrderDraft): Promise<string> {
   // Ya es un secure_url de Cloudinary (o null) — la subida ocurrió antes,
   // en Step3EmpaqueExtras, vía src/lib/cloudinaryUpload.ts.
   const imagenReferencia = draft.imagenReferencia
+
+  // Se recalcula aquí (no se reutiliza el useMemo de Step5Confirmacion) para
+  // garantizar que lo que se guarda en Firestore coincide exactamente con lo
+  // que se le mostró al cliente, incluso si tocó algo en el último instante
+  // sin que el useMemo del componente alcanzara a recalcular antes del submit.
+  const estimate = calculateEstimate(draft, config, pricesDoc)
 
   const docRef = await addDoc(collection(db, ORDERS_COLLECTION), {
     createdAt: serverTimestamp(),
@@ -39,7 +52,7 @@ export async function submitOrder(draft: OrderDraft): Promise<string> {
       forma: draft.forma,
       esPisos: draft.esPisos,
       tamano: draft.tamano,
-      personas: personasDeTamano(draft.tamano),
+      personas: personasDeTamano(config, draft.tamano),
       esTresLeches: draft.esTresLeches,
       sabor: draft.sabor,
       relleno: draft.relleno,
@@ -50,6 +63,19 @@ export async function submitOrder(draft: OrderDraft): Promise<string> {
     imagenReferencia,
     fechaEntrega: Timestamp.fromDate(new Date(`${draft.fechaEntrega}T12:00:00`)),
     comentarios: draft.comentarios.trim() || null,
+    precioEstimado: estimate.total,
+    desglosePrecio:
+      estimate.total !== null
+        ? {
+            base: estimate.base,
+            estructuraPisos: estimate.estructuraPisos,
+            empaque: estimate.empaque,
+            extras: estimate.extras,
+            incluyeFondant: estimate.incluyeFondant,
+          }
+        : null,
+    requiresCotizacion: estimate.requiresCotizacion,
+    cotizacionReason: estimate.cotizacionReason,
     precioFinal: null,
     notaAdmin: null,
     fechaResolucion: null,

@@ -1,4 +1,5 @@
 import { fechaMinimaEntrega, formatFechaMinima } from '../../../config/cakeRules'
+import { useBusinessRules } from '../../../context/BusinessRulesContext'
 import { toDateInputValue } from '../../../lib/date'
 import { isValidPhone, PHONE_COUNTRIES, type PhoneCountry } from '../../../lib/phone'
 import type { OrderDraft } from '../../../types/order'
@@ -13,7 +14,8 @@ export function Step4ContactoFecha({
   update: (patch: Partial<OrderDraft>) => void
   showErrors: boolean
 }) {
-  const minDateValue = toDateInputValue(fechaMinimaEntrega(draft.esPisos))
+  const config = useBusinessRules()
+  const minDateValue = toDateInputValue(fechaMinimaEntrega(config, draft.esPisos))
 
   const nombreError = showErrors && !draft.nombre.trim() ? 'Escribe tu nombre.' : undefined
   const direccionError = showErrors && !draft.direccion.trim() ? 'Escribe tu dirección.' : undefined
@@ -23,7 +25,7 @@ export function Step4ContactoFecha({
       : undefined
   const fechaError =
     showErrors && (!draft.fechaEntrega || draft.fechaEntrega < minDateValue)
-      ? `Elige una fecha a partir del ${formatFechaMinima(draft.esPisos)}.`
+      ? `Elige una fecha a partir del ${formatFechaMinima(config, draft.esPisos)}.`
       : undefined
   const emailError =
     showErrors && draft.email.trim() && !/^\S+@\S+\.\S+$/.test(draft.email.trim())
@@ -103,7 +105,11 @@ export function Step4ContactoFecha({
         label="Fecha de entrega"
         htmlFor="fecha"
         error={fechaError}
-        hint={!fechaError ? `Con al menos ${draft.esPisos ? '5' : '3'} días de anticipación.` : undefined}
+        hint={
+          !fechaError
+            ? `Con al menos ${draft.esPisos ? config.leadTimeDiasPisos : config.leadTimeDias} días de anticipación.`
+            : undefined
+        }
       >
         <TextInput
           id="fecha"

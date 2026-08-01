@@ -1,11 +1,11 @@
 import {
   FORMAS,
-  TAMANOS_POR_FORMA,
   isPisosDisponible,
   isTresLechesDisponible,
   personasDeTamano,
   type Forma,
 } from '../../../config/cakeRules'
+import { useBusinessRules } from '../../../context/BusinessRulesContext'
 import type { OrderDraft } from '../../../types/order'
 import { ChipGroup, Field, Select, Toggle } from '../fields'
 
@@ -16,13 +16,15 @@ export function Step1FormaTamano({
   draft: OrderDraft
   update: (patch: Partial<OrderDraft>) => void
 }) {
-  const tamanos = draft.forma ? TAMANOS_POR_FORMA[draft.forma] : []
-  const personas = draft.tamano ? personasDeTamano(draft.tamano) : null
-  const pisosDisponible = draft.forma !== null && personas !== null && isPisosDisponible(draft.forma, personas)
+  const config = useBusinessRules()
+  const tamanos = draft.forma ? config.tamanosPorForma[draft.forma] : []
+  const personas = draft.tamano ? personasDeTamano(config, draft.tamano) : null
+  const pisosDisponible =
+    draft.forma !== null && personas !== null && isPisosDisponible(config, draft.forma, personas)
   const tresLechesDisponible =
     draft.forma !== null &&
     personas !== null &&
-    isTresLechesDisponible(draft.forma, personas, draft.esPisos)
+    isTresLechesDisponible(config, draft.forma, personas, draft.esPisos)
 
   return (
     <div className="flex flex-col gap-6">

@@ -1,10 +1,19 @@
 import { useRef, useState } from 'react'
 import { ArrowClockwise, Image, X } from '@phosphor-icons/react'
-import { EMPAQUE_BASE, EXTRAS_DISPONIBLES, getEmpaquesDisponibles, personasDeTamano } from '../../../config/cakeRules'
-import type { ExtraOpcion } from '../../../config/cakeRules'
+import { EMPAQUE_BASE, getEmpaquesDisponibles, personasDeTamano } from '../../../config/cakeRules'
+import type { ExtraConfig } from '../../../config/cakeRules'
+import { useBusinessRules } from '../../../context/BusinessRulesContext'
 import { uploadReferenceImage, validateReferenceImage } from '../../../lib/cloudinaryUpload'
 import type { OrderDraft } from '../../../types/order'
 import { Field, RadioCards } from '../fields'
+
+/** Texto de precio de un extra según su combinación de esRango/sumaAlEstimado — nunca
+ *  se muestra un monto si sumaAlEstimado es false (el precio se confirma después). */
+function precioTexto(extra: ExtraConfig): string {
+  if (!extra.sumaAlEstimado) return 'precio se confirma al aprobar el pedido'
+  if (extra.esRango) return `desde $${extra.precioBase}`
+  return `$${extra.precioFijo}`
+}
 
 export function Step3EmpaqueExtras({
   draft,
@@ -13,19 +22,33 @@ export function Step3EmpaqueExtras({
   draft: OrderDraft
   update: (patch: Partial<OrderDraft>) => void
 }) {
+  const config = useBusinessRules()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (!draft.tamano) return null
-  const personas = personasDeTamano(draft.tamano)
-  const empaques = getEmpaquesDisponibles(personas)
+  const personas = personasDeTamano(config, draft.tamano)
+  const empaques = getEmpaquesDisponibles(config, personas)
 
-  function toggleExtra(extra: ExtraOpcion) {
-    const exists = draft.extras.some((e) => e.tipo === extra.tipo)
+  function toggleExtra(tipo: string) {
+    const exists = draft.extras.some((e) => e.tipo === tipo)
     update({
-      extras: exists ? draft.extras.filter((e) => e.tipo !== extra.tipo) : [...draft.extras, extra],
+      extras: exists ? draft.extras.filter((e) => e.tipo !== tipo) : [...draft.extras, { tipo }],
+    })
+  }
+
+  function setCantidad(tipo: string, cantidad: number) {
+    if (cantidad <= 0) {
+      update({ extras: draft.extras.filter((e) => e.tipo !== tipo) })
+      return
+    }
+    const exists = draft.extras.some((e) => e.tipo === tipo)
+    update({
+      extras: exists
+        ? draft.extras.map((e) => (e.tipo === tipo ? { ...e, cantidad } : e))
+        : [...draft.extras, { tipo, cantidad }],
     })
   }
 
@@ -84,8 +107,35 @@ export function Step3EmpaqueExtras({
 
       <Field label="Extras (opcional)">
         <div className="flex flex-col gap-2">
-          {EXTRAS_DISPONIBLES.map((extra) => {
-            const checked = draft.extras.some((e) => e.tipo === extra.tipo)
+          {config.extras.map((extra) => {
+            const selected = draft.extras.find((e) => e.tipo === extra.tipo)
+
+            if (extra.esPorPieza) {
+              return (
+                <div
+                  key={extra.tipo}
+                  className={`flex items-center justify-between gap-3 rounded-md border px-4 py-3 transition-colors duration-200 ${
+                    selected ? 'border-brand bg-card-strong' : 'border-border-subtle bg-canvas'
+                  }`}
+                >
+                  <div>
+                    <p className="text-sm text-ink">{extra.label}</p>
+                    <p className="text-xs text-ink-soft">${extra.precioPorPieza}/pieza</p>
+                  </div>
+                  <input
+                    type="number"
+                    min={0}
+                    inputMode="numeric"
+                    value={selected?.cantidad ?? 0}
+                    onChange={(e) => setCantidad(extra.tipo, Math.max(0, Math.floor(Number(e.target.value) || 0)))}
+                    aria-label={`Cantidad de ${extra.label}`}
+                    className="w-16 rounded-sm border border-border-subtle bg-canvas px-2 py-1 text-right text-sm text-ink"
+                  />
+                </div>
+              )
+            }
+
+            const checked = Boolean(selected)
             return (
               <label
                 key={extra.tipo}
@@ -96,10 +146,12 @@ export function Step3EmpaqueExtras({
                 <input
                   type="checkbox"
                   checked={checked}
-                  onChange={() => toggleExtra(extra)}
+                  onChange={() => toggleExtra(extra.tipo)}
                   className="h-4 w-4 accent-[var(--color-primary)]"
                 />
-                <span className="text-sm text-ink">{extra.descripcion}</span>
+                <span className="text-sm text-ink">
+                  {extra.label} — <span className="text-ink-soft">{precioTexto(extra)}</span>
+                </span>
               </label>
             )
           })}

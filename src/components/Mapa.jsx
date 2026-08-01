@@ -5,19 +5,28 @@ const LNG = -100.6449629
 export default function Mapa() {
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <div className="overflow-hidden rounded-md border border-border-subtle">
-        <iframe
-          title="Ubicación de Lupita Riccco"
-          src={`https://www.google.com/maps?q=loc:${LAT}+${LNG}&z=17&output=embed`}
-          className="h-72 w-full md:h-96"
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
+      {/*
+        Tratamiento "postal": mat color crema fijo (--color-background, NO
+        el token de superficie que cambia con el tema) — una postal física
+        no cambia de color en modo oscuro, así que se toma como excepción
+        deliberada al mismo patrón que --text-on-brand en tokens.css.
+        Ligera rotación + sombra cálida para que se sienta como algo
+        colocado sobre la mesa, no un mapa embebido más.
+      */}
+      <div className="-rotate-1 rounded-md bg-[var(--color-background)] p-3 shadow-[0_12px_28px_-8px_rgba(26,26,26,0.28)] ring-1 ring-black/5 transition-transform duration-300 ease-out hover:rotate-0 md:p-4">
+        <div className="overflow-hidden rounded-sm">
+          <iframe
+            title="Ubicación de Lupita Riccco"
+            src={`https://www.google.com/maps?q=loc:${LAT}+${LNG}&z=17&output=embed`}
+            className="h-72 w-full md:h-96"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-col items-center gap-1 text-center">
+      <div className="mt-5 flex flex-col items-center gap-1 text-center">
         <p className="font-medium text-ink">Lupita Riccco, Los Rodríguez</p>
-        {/* TODO: reemplazar por la dirección completa (calle, colonia, CP) cuando la confirmes */}
         <a
           href={MAPS_SHARE_URL}
           target="_blank"

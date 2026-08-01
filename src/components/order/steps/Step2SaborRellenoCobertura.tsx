@@ -4,6 +4,7 @@ import {
   getRellenosDisponibles,
   getSaboresDisponibles,
 } from '../../../config/cakeRules'
+import { useBusinessRules } from '../../../context/BusinessRulesContext'
 import type { OrderDraft } from '../../../types/order'
 import { Field, RadioCards, Select } from '../fields'
 
@@ -14,11 +15,12 @@ export function Step2SaborRellenoCobertura({
   draft: OrderDraft
   update: (patch: Partial<OrderDraft>) => void
 }) {
+  const config = useBusinessRules()
   if (!draft.tamano) return null
 
-  const sabores = getSaboresDisponibles({ tamano: draft.tamano, esTresLeches: draft.esTresLeches })
-  const rellenos = getRellenosDisponibles({ tamano: draft.tamano, esTresLeches: draft.esTresLeches })
-  const coberturaInfo = getCoberturaDisponible({
+  const sabores = getSaboresDisponibles(config, { tamano: draft.tamano, esTresLeches: draft.esTresLeches })
+  const rellenos = getRellenosDisponibles(config, { tamano: draft.tamano, esTresLeches: draft.esTresLeches })
+  const coberturaInfo = getCoberturaDisponible(config, {
     tamano: draft.tamano,
     esTresLeches: draft.esTresLeches,
     esPisos: draft.esPisos,

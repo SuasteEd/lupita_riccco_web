@@ -1,13 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { X } from '@phosphor-icons/react'
-import { fechaMinimaEntrega } from '../../config/cakeRules'
+import { fechaMinimaEntrega, loadBusinessRules } from '../../config/cakeRules'
+import { DEFAULT_CONFIG, type BusinessRulesConfig } from '../../config/businessRulesDefault'
+import { loadCakePrices, type CakePricesDocument } from '../../config/cakePrices'
+import { calculateEstimate } from '../../config/pricing'
+import { BusinessRulesContext } from '../../context/BusinessRulesContext'
 import { getSubmitCooldownRemainingMs, isHoneypotTripped, markSubmitted } from '../../lib/antiSpam'
 import { toDateInputValue } from '../../lib/date'
 import { submitOrder } from '../../lib/firestoreOrders'
 import { isValidPhone } from '../../lib/phone'
 import { sanitizeOrderDraft } from '../../lib/sanitizeOrderDraft'
 import { EMPTY_ORDER_DRAFT, type OrderDraft } from '../../types/order'
+import { buildWhatsAppUrl } from '../../utils/whatsapp'
 import { SuccessScreen } from './SuccessScreen'
 import { Step1FormaTamano } from './steps/Step1FormaTamano'
 import { Step2SaborRellenoCobertura } from './steps/Step2SaborRellenoCobertura'
@@ -42,7 +47,7 @@ function friendlySubmitError(err: unknown): string {
   return 'No pudimos enviar tu solicitud. Intenta de nuevo o escríbenos por WhatsApp.'
 }
 
-function canAdvance(step: number, draft: OrderDraft): boolean {
+function canAdvance(step: number, draft: OrderDraft, config: BusinessRulesConfig): boolean {
   switch (step) {
     case 1:
       return draft.forma !== null && draft.tamano !== null
@@ -56,7 +61,7 @@ function canAdvance(step: number, draft: OrderDraft): boolean {
         draft.direccion.trim().length > 0 &&
         isValidPhone(draft.telefono, draft.telefonoPais) &&
         draft.fechaEntrega.length > 0 &&
-        draft.fechaEntrega >= toDateInputValue(fechaMinimaEntrega(draft.esPisos)) &&
+        draft.fechaEntrega >= toDateInputValue(fechaMinimaEntrega(config, draft.esPisos)) &&
         isEmailValid(draft.email)
       )
     default:
@@ -72,6 +77,25 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
+  const [rulesConfig, setRulesConfig] = useState<BusinessRulesConfig>(DEFAULT_CONFIG)
+  const [rulesLoading, setRulesLoading] = useState(true)
+  const [pricesDoc, setPricesDoc] = useState<CakePricesDocument | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([loadBusinessRules(), loadCakePrices()])
+      .then(([rules, prices]) => {
+        if (cancelled) return
+        setRulesConfig(rules)
+        setPricesDoc(prices)
+      })
+      .finally(() => {
+        if (!cancelled) setRulesLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -88,12 +112,20 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
+  // Determina qué botón muestra el footer en el paso 5 (Enviar solicitud vs
+  // WhatsApp) — se recalcula aquí, no solo dentro de Step5Confirmacion, porque
+  // el footer con los botones vive en OrderForm, no en el step.
+  const estimate = useMemo(
+    () => calculateEstimate(draft, rulesConfig, pricesDoc),
+    [draft, rulesConfig, pricesDoc],
+  )
+
   function update(patch: Partial<OrderDraft>) {
-    setDraft((prev) => sanitizeOrderDraft({ ...prev, ...patch }))
+    setDraft((prev) => sanitizeOrderDraft({ ...prev, ...patch }, rulesConfig))
   }
 
   function handleNext() {
-    if (canAdvance(step, draft)) {
+    if (canAdvance(step, draft, rulesConfig)) {
       setShowErrors(false)
       setStep((s) => Math.min(s + 1, 5))
     } else {
@@ -127,7 +159,7 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
 
     // Un solo llamado real a submitOrder — se referencia dos veces, nunca
     // se vuelve a invocar, para no arriesgar una escritura duplicada.
-    const submitPromise = submitOrder(draft)
+    const submitPromise = submitOrder(draft, rulesConfig, pricesDoc)
     // Si termina después de que el timeout ya mostró un error, igual
     // reflejamos el éxito en vez de dejar al cliente pensando que falló.
     submitPromise.then((id) => setSuccessId(id)).catch(() => {})
@@ -152,6 +184,19 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
   }
 
   const StepComponent = (() => {
+    // Solo el paso 1 muestra skeleton: es el único que depende de catálogos
+    // (sabor/tamaño) que pueden diferir entre DEFAULT_CONFIG y lo real de
+    // Firestore. El resto de los pasos no se alcanzan hasta que el paso 1
+    // avanza, para entonces rulesLoading ya casi siempre resolvió.
+    if (step === 1 && rulesLoading) {
+      return (
+        <div className="animate-pulse space-y-4" aria-busy="true" aria-label="Cargando opciones">
+          <div className="h-10 rounded-md bg-card" />
+          <div className="h-10 rounded-md bg-card" />
+          <div className="h-10 w-2/3 rounded-md bg-card" />
+        </div>
+      )
+    }
     switch (step) {
       case 1:
         return <Step1FormaTamano draft={draft} update={update} />
@@ -162,13 +207,14 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
       case 4:
         return <Step4ContactoFecha draft={draft} update={update} showErrors={showErrors} />
       case 5:
-        return <Step5Confirmacion draft={draft} />
+        return <Step5Confirmacion draft={draft} pricesDoc={pricesDoc} />
       default:
         return null
     }
   })()
 
   return (
+    <BusinessRulesContext.Provider value={rulesConfig}>
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--color-dark)]/60 backdrop-blur-sm md:items-center md:p-6">
       <motion.div
         initial={reduce ? false : { opacity: 0, y: 24 }}
@@ -250,6 +296,18 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
                 >
                   Siguiente
                 </button>
+              ) : estimate.requiresCotizacion ? (
+                // Tamaño grande / sin precio en tabla: bypasea Firestore por
+                // completo, va directo a WhatsApp — nunca se crea un
+                // web_order_request para estos casos.
+                <a
+                  href={buildWhatsAppUrl(draft, rulesConfig)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-pill bg-brand px-6 py-2.5 text-center text-sm font-semibold text-on-brand transition-transform duration-200 active:scale-[0.98]"
+                >
+                  Solicitar cotización por WhatsApp →
+                </a>
               ) : (
                 <button
                   type="button"
@@ -265,5 +323,6 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
         )}
       </motion.div>
     </div>
+    </BusinessRulesContext.Provider>
   )
 }

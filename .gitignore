@@ -14,6 +14,14 @@ dist/
 dist-ssr
 *.local
 
+# Credenciales del script de seed (Firebase Admin service account)
+scripts/service-account.json
+scripts/*.json
+
+# Excel de origen con precios reales del negocio — solo referencia local
+# para scripts/seed-cake-prices.ts, no debe llegar al repo remoto.
+Libro1.xlsx
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

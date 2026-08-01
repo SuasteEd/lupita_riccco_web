@@ -11,7 +11,6 @@
     <meta property="og:description" content="Cafetería, repostería" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/logo.png" />
-    <!-- TODO: reemplazar og:image por una foto real del local o de un producto insignia (1200x630) cuando esté disponible -->
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Lupita Riccco – Cafetería, repostería" />
@@ -19,16 +18,15 @@
     <meta name="twitter:image" content="/logo.png" />
 
     <script>
-      // Applies the saved/system light-dark choice before first paint,
-      // so switching pages or reloading never flashes the wrong theme.
+      // Aplica la elección guardada antes del primer paint (sin flash).
+      // Claro es el default siempre que no haya una elección explícita
+      // guardada — no sigue prefers-color-scheme del sistema, para que la
+      // marca se vea igual sin importar el modo del dispositivo del
+      // visitante. El toggle manual (ThemeToggle.jsx) sigue funcionando
+      // igual y su elección se respeta en visitas futuras.
       (function () {
         var stored = localStorage.getItem('lr-theme');
-        var theme =
-          stored === 'light' || stored === 'dark'
-            ? stored
-            : window.matchMedia('(prefers-color-scheme: dark)').matches
-              ? 'dark'
-              : 'light';
+        var theme = stored === 'dark' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>

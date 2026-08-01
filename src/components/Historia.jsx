@@ -35,7 +35,7 @@ const HITOS = [
   },
   {
     label: 'Hoy',
-    text: 'Licenciada en Gastronomía. Mi cocina de casa es ahora una pequeña empresa con 6 empleos.',
+    text: 'Licenciada en Gastronomía. Mi cocina de casa es ahora una pequeña empresa.',
     Icon: GraduationCapIcon,
   },
 ]
