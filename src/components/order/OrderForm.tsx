@@ -80,6 +80,7 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
   const [rulesConfig, setRulesConfig] = useState<BusinessRulesConfig>(DEFAULT_CONFIG)
   const [rulesLoading, setRulesLoading] = useState(true)
   const [pricesDoc, setPricesDoc] = useState<CakePricesDocument | null>(null)
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -159,7 +160,7 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
 
     // Un solo llamado real a submitOrder — se referencia dos veces, nunca
     // se vuelve a invocar, para no arriesgar una escritura duplicada.
-    const submitPromise = submitOrder(draft, rulesConfig, pricesDoc)
+    const submitPromise = submitOrder(draft, rulesConfig, pricesDoc, termsAccepted)
     // Si termina después de que el timeout ya mostró un error, igual
     // reflejamos el éxito en vez de dejar al cliente pensando que falló.
     submitPromise.then((id) => setSuccessId(id)).catch(() => {})
@@ -207,7 +208,14 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
       case 4:
         return <Step4ContactoFecha draft={draft} update={update} showErrors={showErrors} />
       case 5:
-        return <Step5Confirmacion draft={draft} pricesDoc={pricesDoc} />
+        return (
+          <Step5Confirmacion
+            draft={draft}
+            pricesDoc={pricesDoc}
+            termsAccepted={termsAccepted}
+            onTermsAcceptedChange={setTermsAccepted}
+          />
+        )
       default:
         return null
     }
@@ -312,7 +320,7 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={submitting}
+                  disabled={submitting || !termsAccepted}
                   className="rounded-pill bg-brand px-6 py-2.5 text-sm font-semibold text-on-brand transition-transform duration-200 active:scale-[0.98] disabled:opacity-60"
                 >
                   {submitting ? 'Enviando...' : 'Enviar solicitud'}

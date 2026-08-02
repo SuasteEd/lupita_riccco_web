@@ -1,4 +1,5 @@
 import { FacebookLogo, InstagramLogo, WhatsappLogo } from '@phosphor-icons/react'
+import { Link } from 'react-router'
 import logo from '../assets/logo.png'
 import Mapa from './Mapa.jsx'
 
@@ -44,6 +45,16 @@ export default function Footer() {
         >
           Pedir por WhatsApp
         </a>
+
+        <div className="flex items-center gap-4 text-xs text-ink-soft">
+          <Link to="/privacidad" className="hover:text-brand hover:underline">
+            Política de privacidad
+          </Link>
+          <span aria-hidden="true">·</span>
+          <Link to="/terminos" className="hover:text-brand hover:underline">
+            Términos y condiciones
+          </Link>
+        </div>
 
         <p className="text-sm text-ink-soft">
           Lupita Riccco, Los Rodríguez. Hecho a mano desde 2020.

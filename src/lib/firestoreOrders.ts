@@ -19,6 +19,7 @@ export async function submitOrder(
   draft: OrderDraft,
   config: BusinessRulesConfig,
   pricesDoc: CakePricesDocument | null,
+  termsAccepted: boolean,
 ): Promise<string> {
   if (!draft.forma || !draft.tamano || !draft.sabor || !draft.relleno || !draft.cobertura) {
     throw new Error('Faltan campos obligatorios del pastel.')
@@ -28,6 +29,9 @@ export async function submitOrder(
   if (!draft.nombre.trim()) throw new Error('Falta el nombre.')
   if (!draft.direccion.trim()) throw new Error('Falta la dirección.')
   if (!draft.fechaEntrega) throw new Error('Falta la fecha de entrega.')
+  // El botón "Enviar solicitud" ya está disabled sin esto marcado — esta
+  // validación es solo defensa extra, igual que las de arriba.
+  if (!termsAccepted) throw new Error('Falta aceptar los términos y la política de privacidad.')
 
   // Ya es un secure_url de Cloudinary (o null) — la subida ocurrió antes,
   // en Step3EmpaqueExtras, vía src/lib/cloudinaryUpload.ts.
@@ -76,6 +80,8 @@ export async function submitOrder(
         : null,
     requiresCotizacion: estimate.requiresCotizacion,
     cotizacionReason: estimate.cotizacionReason,
+    termsAccepted: true,
+    termsAcceptedAt: serverTimestamp(),
     precioFinal: null,
     notaAdmin: null,
     fechaResolucion: null,

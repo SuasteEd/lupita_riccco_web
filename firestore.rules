@@ -113,6 +113,7 @@ service cloud.firestore {
           'createdAt', 'status', 'cliente', 'pastel', 'empaque', 'extras',
           'imagenReferencia', 'fechaEntrega', 'comentarios',
           'precioEstimado', 'desglosePrecio', 'requiresCotizacion', 'cotizacionReason',
+          'termsAccepted', 'termsAcceptedAt',
           'precioFinal', 'notaAdmin', 'fechaResolucion'
         ]) &&
 
@@ -121,6 +122,13 @@ service cloud.firestore {
         data.precioFinal == null &&
         data.notaAdmin == null &&
         data.fechaResolucion == null &&
+
+        // El checkbox del paso 5 (Step5Confirmacion.tsx) mantiene "Enviar
+        // solicitud" disabled hasta que se marque — igual que con
+        // requiresCotizacion, se fija como invariante dura en vez de solo
+        // validar el tipo, como defensa extra contra un create manual.
+        data.termsAccepted == true &&
+        data.termsAcceptedAt == request.time &&
 
         // El wizard solo llama submitOrder() cuando requiresCotizacion es
         // false (src/config/pricing.ts) — los tamaños grandes o sin precio

@@ -23,9 +23,13 @@ function Row({ label, value }: { label: string; value: string }) {
 export function Step5Confirmacion({
   draft,
   pricesDoc,
+  termsAccepted,
+  onTermsAcceptedChange,
 }: {
   draft: OrderDraft
   pricesDoc: CakePricesDocument | null
+  termsAccepted: boolean
+  onTermsAcceptedChange: (accepted: boolean) => void
 }) {
   const config = useBusinessRules()
   const estimate = useMemo(() => calculateEstimate(draft, config, pricesDoc), [draft, config, pricesDoc])
@@ -136,6 +140,43 @@ export function Step5Confirmacion({
           {draft.comentarios && <Row label="Comentarios" value={draft.comentarios} />}
         </div>
       </div>
+
+      {/*
+        Solo cuando SÍ va a crear un web_order_request — el flujo de
+        cotización (requiresCotizacion: true) bypasea Firestore por
+        completo y va directo a WhatsApp, no hay nada que "aceptar" aquí.
+      */}
+      {!estimate.requiresCotizacion && (
+        <label className="flex items-start gap-3 rounded-md border border-border-subtle bg-canvas px-4 py-3">
+          <input
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => onTermsAcceptedChange(e.target.checked)}
+            className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[var(--color-primary)]"
+          />
+          <span className="text-sm text-ink">
+            He leído y acepto los{' '}
+            <a
+              href="/terminos"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-brand underline underline-offset-4"
+            >
+              Términos y condiciones
+            </a>{' '}
+            y la{' '}
+            <a
+              href="/privacidad"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-brand underline underline-offset-4"
+            >
+              Política de privacidad
+            </a>
+            .
+          </span>
+        </label>
+      )}
     </div>
   )
 }
