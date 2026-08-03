@@ -117,7 +117,7 @@ service cloud.firestore {
           'precioFinal', 'notaAdmin', 'fechaResolucion'
         ]) &&
 
-        data.status == 'pending' &&
+        data.status == 'pendienteAnticipo' &&
         data.createdAt == request.time &&
         data.precioFinal == null &&
         data.notaAdmin == null &&
