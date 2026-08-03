@@ -184,6 +184,10 @@ export function Step3EmpaqueExtras({
           </div>
         ) : uploading ? (
           <div className="flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-border-subtle px-4 py-6 text-sm font-medium text-ink-soft">
+            <span
+              className="h-4 w-4 animate-spin rounded-full border-2 border-border-subtle border-t-ink-soft"
+              aria-hidden="true"
+            />
             Subiendo imagen...
           </div>
         ) : uploadError ? (

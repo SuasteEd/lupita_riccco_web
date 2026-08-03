@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { X } from '@phosphor-icons/react'
+import { ArrowClockwiseIcon, WarningCircleIcon, X } from '@phosphor-icons/react'
 import { fechaMinimaEntrega, loadBusinessRules } from '../../config/cakeRules'
 import { DEFAULT_CONFIG, type BusinessRulesConfig } from '../../config/businessRulesDefault'
 import { loadCakePrices, type CakePricesDocument } from '../../config/cakePrices'
@@ -286,7 +286,12 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
           <div className="border-t border-border-subtle px-5 py-4">
             {/* Fuera del área con scroll (arriba) a propósito: un error de
                 envío tiene que verse sin que el cliente tenga que bajar. */}
-            {submitError && <p className="mb-3 text-sm text-danger">{submitError}</p>}
+            {submitError && (
+              <p className="mb-3 flex items-start gap-1.5 text-sm text-danger">
+                <WarningCircleIcon size={18} weight="bold" className="mt-0.5 flex-shrink-0" />
+                {submitError}
+              </p>
+            )}
             <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
@@ -321,9 +326,24 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting || !termsAccepted}
-                  className="rounded-pill bg-brand px-6 py-2.5 text-sm font-semibold text-on-brand transition-transform duration-200 active:scale-[0.98] disabled:opacity-60"
+                  className="flex items-center gap-2 rounded-pill bg-brand px-6 py-2.5 text-sm font-semibold text-on-brand transition-transform duration-200 active:scale-[0.98] disabled:opacity-60"
                 >
-                  {submitting ? 'Enviando...' : 'Enviar solicitud'}
+                  {submitting ? (
+                    <>
+                      <span
+                        className="h-4 w-4 animate-spin rounded-full border-2 border-on-brand/30 border-t-on-brand"
+                        aria-hidden="true"
+                      />
+                      Enviando...
+                    </>
+                  ) : submitError ? (
+                    <>
+                      <ArrowClockwiseIcon size={18} weight="bold" />
+                      Reintentar
+                    </>
+                  ) : (
+                    'Enviar solicitud'
+                  )}
                 </button>
               )}
             </div>
