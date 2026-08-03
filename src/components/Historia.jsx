@@ -29,7 +29,7 @@ const HITOS = [
     Icon: InstagramLogoIcon,
   },
   {
-    label: '27 de julio, 2020',
+    label: '27 de julio, 2024',
     text: 'Abrí mi tienda física en Los Rodríguez, sin dejar las entregas desde casa de mis papás.',
     Icon: StorefrontIcon,
   },
