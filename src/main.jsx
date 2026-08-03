@@ -6,6 +6,7 @@ import App from './App.jsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { OfflineBanner } from './components/OfflineBanner.jsx'
 import ScrollToTop from './components/ScrollToTop.jsx'
+import NotFound from './pages/NotFound.tsx'
 import PrivacyPolicy from './pages/PrivacyPolicy.tsx'
 import TermsAndConditions from './pages/TermsAndConditions.tsx'
 
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/" element={<App />} />
           <Route path="/privacidad" element={<PrivacyPolicy />} />
           <Route path="/terminos" element={<TermsAndConditions />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>

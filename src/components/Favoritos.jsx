@@ -63,6 +63,7 @@ const FAVORITOS = [
     alt: 'Dos vasos de fresas con crema en capas',
     span: 'md:col-span-1',
     aspect: 'aspect-[4/5]',
+    note: 'Incluye cheesecake o brownie'
   },
 ]
 

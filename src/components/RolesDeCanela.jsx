@@ -41,10 +41,11 @@ export default function RolesDeCanela() {
           >
             <h2 className="text-h2 font-medium">Roles de canela</h2>
             <p className="mt-4 text-ink">
-              Mis roles de canela, preparados desde cero en mi cocina, son muy
-              populares y han sido clave para ganar seguidores. Elegí hacer
-              roles porque la canela es mi especia favorita. Si visitas la
-              tienda, te los recomiendo.
+             Los roles de canela nacieron en mi cocina por una razón simple:
+            la canela es mi especia favorita. Desde el primer día se convirtieron
+            en los más pedidos, y hoy son difíciles de encontrar sin reservar.
+            Si visitas la tienda, pregunta si hay disponibles, pero si quieres
+            asegurarte, lo mejor es hacer tu pedido con anticipación.
             </p>
           </motion.div>
         </div>
