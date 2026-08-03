@@ -45,7 +45,7 @@ export async function submitOrder(
 
   const docRef = await addDoc(collection(db, ORDERS_COLLECTION), {
     createdAt: serverTimestamp(),
-    status: 'pendienteAnticipo',
+    status: 'pending',
     cliente: {
       nombre: draft.nombre.trim(),
       telefono,
