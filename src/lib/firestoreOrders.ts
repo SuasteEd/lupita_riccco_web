@@ -45,7 +45,10 @@ export async function submitOrder(
 
   const docRef = await addDoc(collection(db, ORDERS_COLLECTION), {
     createdAt: serverTimestamp(),
-    status: 'pending',
+    // Sin precio en tabla / tamaño grande: el pedido igual se guarda, pero
+    // con un status distinto para que la app admin lo muestre aparte
+    // mientras se negocia el precio final por WhatsApp (ver SuccessScreen.tsx).
+    status: estimate.requiresCotizacion ? 'pending_whatsapp' : 'pending',
     cliente: {
       nombre: draft.nombre.trim(),
       telefono,

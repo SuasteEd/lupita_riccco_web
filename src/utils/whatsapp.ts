@@ -3,10 +3,11 @@ import type { BusinessRulesConfig } from '../config/businessRulesDefault'
 import type { OrderDraft } from '../types/order'
 
 /*
-  Solo se usa cuando requiresCotizacion es true (pricing.ts): tamaños
-  grandes o combinaciones sin precio en tabla, donde el flujo bypasea
-  Firestore por completo y va directo a WhatsApp — nunca se crea un
-  web_order_request para estos casos.
+  Se usa cuando requiresCotizacion es true (pricing.ts): tamaños grandes o
+  combinaciones sin precio en tabla. El pedido se guarda primero como
+  web_order_request (status "pending_whatsapp", ver firestoreOrders.ts) —
+  este mensaje solo arma el texto prellenado del link de WhatsApp que se
+  ofrece en SuccessScreen después de guardar, para continuar la conversación.
 
   El wizard hoy solo permite UN sabor y UN relleno (draft.sabor/relleno
   son string | null, sin importar el tamaño) — no hay multi-selección
@@ -31,6 +32,8 @@ function formatFechaEntrega(fechaEntrega: string): string | null {
 
 export function buildWhatsAppMessage(draft: OrderDraft, config: BusinessRulesConfig): string {
   const lineas: string[] = ['Hola, quiero cotizar un pastel personalizado:']
+
+  if (draft.nombre.trim()) lineas.push(`Nombre: ${draft.nombre.trim()}`)
 
   if (draft.forma) {
     const formaLabel = FORMAS.find((f) => f.value === draft.forma)?.label ?? draft.forma
