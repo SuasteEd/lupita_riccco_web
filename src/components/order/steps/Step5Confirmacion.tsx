@@ -66,7 +66,7 @@ export function Step5Confirmacion({
             <p className="mt-1 text-sm text-ink-soft">{estimate.cotizacionReason}</p>
           )}
           <p className="mt-3 text-sm text-ink-soft">
-            Usa el botón de WhatsApp abajo para enviarnos los detalles de tu pedido y recibir un precio.
+            Guarda tu solicitud y te llevamos directo a WhatsApp para afinar los detalles y recibir tu precio.
           </p>
         </div>
       ) : (
@@ -141,42 +141,37 @@ export function Step5Confirmacion({
         </div>
       </div>
 
-      {/*
-        Solo cuando SÍ va a crear un web_order_request — el flujo de
-        cotización (requiresCotizacion: true) bypasea Firestore por
-        completo y va directo a WhatsApp, no hay nada que "aceptar" aquí.
-      */}
-      {!estimate.requiresCotizacion && (
-        <label className="flex items-start gap-3 rounded-md border border-border-subtle bg-canvas px-4 py-3">
-          <input
-            type="checkbox"
-            checked={termsAccepted}
-            onChange={(e) => onTermsAcceptedChange(e.target.checked)}
-            className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[var(--color-primary)]"
-          />
-          <span className="text-sm text-ink">
-            He leído y acepto los{' '}
-            <a
-              href="/terminos"
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-brand underline underline-offset-4"
-            >
-              Términos y condiciones
-            </a>{' '}
-            y la{' '}
-            <a
-              href="/privacidad"
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-brand underline underline-offset-4"
-            >
-              Política de privacidad
-            </a>
-            .
-          </span>
-        </label>
-      )}
+      {/* Se muestra en ambos caminos: con precio o cotización por WhatsApp,
+          el pedido siempre se guarda como web_order_request. */}
+      <label className="flex items-start gap-3 rounded-md border border-border-subtle bg-canvas px-4 py-3">
+        <input
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => onTermsAcceptedChange(e.target.checked)}
+          className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[var(--color-primary)]"
+        />
+        <span className="text-sm text-ink">
+          He leído y acepto los{' '}
+          <a
+            href="/terminos"
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-brand underline underline-offset-4"
+          >
+            Términos y condiciones
+          </a>{' '}
+          y la{' '}
+          <a
+            href="/privacidad"
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-brand underline underline-offset-4"
+          >
+            Política de privacidad
+          </a>
+          .
+        </span>
+      </label>
     </div>
   )
 }

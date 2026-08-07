@@ -12,7 +12,6 @@ import { submitOrder } from '../../lib/firestoreOrders'
 import { isValidPhone } from '../../lib/phone'
 import { sanitizeOrderDraft } from '../../lib/sanitizeOrderDraft'
 import { EMPTY_ORDER_DRAFT, type OrderDraft } from '../../types/order'
-import { buildWhatsAppUrl } from '../../utils/whatsapp'
 import { SuccessScreen } from './SuccessScreen'
 import { Step1FormaTamano } from './steps/Step1FormaTamano'
 import { Step2SaborRellenoCobertura } from './steps/Step2SaborRellenoCobertura'
@@ -251,7 +250,12 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
 
         <div className="flex-1 overflow-y-auto px-5 py-6">
           {successId ? (
-            <SuccessScreen onClose={onClose} />
+            <SuccessScreen
+              onClose={onClose}
+              requiresCotizacion={estimate.requiresCotizacion}
+              draft={draft}
+              config={rulesConfig}
+            />
           ) : (
             // Solo animación de entrada (sin exit/mode="wait"): el título
             // "Paso X de 5" del header cambia en el mismo instante que el
@@ -309,18 +313,6 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
                 >
                   Siguiente
                 </button>
-              ) : estimate.requiresCotizacion ? (
-                // Tamaño grande / sin precio en tabla: bypasea Firestore por
-                // completo, va directo a WhatsApp — nunca se crea un
-                // web_order_request para estos casos.
-                <a
-                  href={buildWhatsAppUrl(draft, rulesConfig)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-pill bg-brand px-6 py-2.5 text-center text-sm font-semibold text-on-brand transition-transform duration-200 active:scale-[0.98]"
-                >
-                  Solicitar cotización por WhatsApp →
-                </a>
               ) : (
                 <button
                   type="button"
@@ -341,6 +333,8 @@ export function OrderForm({ onClose }: { onClose: () => void }) {
                       <ArrowClockwiseIcon size={18} weight="bold" />
                       Reintentar
                     </>
+                  ) : estimate.requiresCotizacion ? (
+                    'Enviar y continuar por WhatsApp'
                   ) : (
                     'Enviar solicitud'
                   )}

@@ -103,6 +103,40 @@ service cloud.firestore {
       ];
     }
 
+    // Un pedido creado desde el wizard cae en una de dos formas válidas,
+    // según si el wizard pudo calcular un precio o no (src/config/pricing.ts):
+    // con precio (status "pending", precioEstimado/desglosePrecio poblados)
+    // o pendiente de cotización por WhatsApp (status "pending_whatsapp",
+    // sin precio — el pedido igual se guarda para que quede registrado
+    // mientras se negocia el precio final por WhatsApp). Se fija como
+    // invariante dura, no solo el tipo, como defensa extra contra una
+    // escritura manual que se salte esa regla del wizard.
+    function isValidPricingBranch(data) {
+      return
+        data.status == 'pending' &&
+        data.requiresCotizacion == false &&
+        data.cotizacionReason == null &&
+        data.precioEstimado is number &&
+        data.desglosePrecio is map &&
+        data.desglosePrecio.keys().hasOnly(['base', 'estructuraPisos', 'empaque', 'extras', 'incluyeFondant']) &&
+        data.desglosePrecio.base is number &&
+        (data.desglosePrecio.estructuraPisos == null || data.desglosePrecio.estructuraPisos is number) &&
+        data.desglosePrecio.empaque is number &&
+        // Igual que con el "extras" de nivel superior: se acota tamaño, no
+        // se valida la forma de cada elemento (impráctico en Firestore Rules).
+        data.desglosePrecio.extras is list && data.desglosePrecio.extras.size() <= 10 &&
+        data.desglosePrecio.incluyeFondant is bool;
+    }
+
+    function isValidWhatsappBranch(data) {
+      return
+        data.status == 'pending_whatsapp' &&
+        data.requiresCotizacion == true &&
+        data.cotizacionReason is string && data.cotizacionReason.size() > 0 &&
+        data.precioEstimado == null &&
+        data.desglosePrecio == null;
+    }
+
     function isValidNewOrder(data) {
       return
         // Ningún campo fuera de este set exacto — sin esto, alguien podría
@@ -117,36 +151,20 @@ service cloud.firestore {
           'precioFinal', 'notaAdmin', 'fechaResolucion'
         ]) &&
 
-        data.status == 'pending' &&
         data.createdAt == request.time &&
         data.precioFinal == null &&
         data.notaAdmin == null &&
         data.fechaResolucion == null &&
 
-        // El checkbox del paso 5 (Step5Confirmacion.tsx) mantiene "Enviar
-        // solicitud" disabled hasta que se marque — igual que con
-        // requiresCotizacion, se fija como invariante dura en vez de solo
-        // validar el tipo, como defensa extra contra un create manual.
+        // El checkbox del paso 5 (Step5Confirmacion.tsx) mantiene el botón
+        // de envío disabled hasta que se marque — se fija como invariante
+        // dura en vez de solo validar el tipo, como defensa extra contra
+        // un create manual.
         data.termsAccepted == true &&
         data.termsAcceptedAt == request.time &&
 
-        // El wizard solo llama submitOrder() cuando requiresCotizacion es
-        // false (src/config/pricing.ts) — los tamaños grandes o sin precio
-        // en tabla van directo a WhatsApp y NUNCA crean un documento aquí.
-        // Se fija como invariante dura, no solo el tipo, como defensa extra
-        // contra una escritura manual que se salte esa regla del wizard.
-        data.requiresCotizacion == false &&
-        data.cotizacionReason == null &&
-        data.precioEstimado is number &&
-        data.desglosePrecio is map &&
-        data.desglosePrecio.keys().hasOnly(['base', 'estructuraPisos', 'empaque', 'extras', 'incluyeFondant']) &&
-        data.desglosePrecio.base is number &&
-        (data.desglosePrecio.estructuraPisos == null || data.desglosePrecio.estructuraPisos is number) &&
-        data.desglosePrecio.empaque is number &&
-        // Igual que con el "extras" de nivel superior: se acota tamaño, no
-        // se valida la forma de cada elemento (impráctico en Firestore Rules).
-        data.desglosePrecio.extras is list && data.desglosePrecio.extras.size() <= 10 &&
-        data.desglosePrecio.incluyeFondant is bool &&
+        (isValidPricingBranch(data) || isValidWhatsappBranch(data)) &&
+
         // Ventana de entrega tiene que ser a futuro — el mínimo de días
         // exacto (3 o 5) es cosmético del formulario, pero "no en el
         // pasado" sí se exige aquí como último resguardo.

@@ -40,6 +40,12 @@ export default function PrivacyPolicy() {
         <p>
           <strong>No usamos tus datos para publicidad ni los compartimos con terceros.</strong>
         </p>
+        <p>
+          Cuando tu pedido requiere cotización personalizada, tu información se guarda
+          de la misma forma que cualquier otro pedido, y además se abre una
+          conversación de WhatsApp para continuar el proceso — no es un canal alterno
+          que evite el registro de tus datos.
+        </p>
       </LegalSection>
 
       <LegalSection number={4} title="Cómo almacenamos tus datos">

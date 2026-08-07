@@ -12,6 +12,13 @@ export default function TermsAndConditions() {
           considera apartado únicamente cuando el negocio lo confirma por WhatsApp y
           recibimos el anticipo correspondiente.
         </p>
+        <p>
+          Si tu pedido requiere cotización personalizada (por tamaño o combinación
+          fuera de nuestra tabla de precios), al enviar tu solicitud igual se guarda
+          tu información en nuestra base de datos — igual que cualquier otro pedido —
+          y te llevamos directo a WhatsApp para continuar la conversación y definir el
+          precio final.
+        </p>
       </LegalSection>
 
       <LegalSection number={2} title="Anticipo y forma de pago">
