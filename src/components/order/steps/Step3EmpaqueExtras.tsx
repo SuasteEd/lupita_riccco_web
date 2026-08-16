@@ -127,7 +127,15 @@ export function Step3EmpaqueExtras({
                     min={0}
                     inputMode="numeric"
                     value={selected?.cantidad ?? 0}
-                    onChange={(e) => setCantidad(extra.tipo, Math.max(0, Math.floor(Number(e.target.value) || 0)))}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? 0 : Math.floor(Number(e.target.value) || 0);
+                      setCantidad(extra.tipo, value)
+                    }}
+                    onFocus={(e) => {
+                      if(e.target.value === '0'){
+                         e.target.value = ''
+                      }
+                    }}
                     aria-label={`Cantidad de ${extra.label}`}
                     className="w-16 rounded-sm border border-border-subtle bg-canvas px-2 py-1 text-right text-sm text-ink"
                   />
