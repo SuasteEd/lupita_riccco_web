@@ -47,7 +47,11 @@ export function buildWhatsAppMessage(draft: OrderDraft, config: BusinessRulesCon
   if (draft.relleno) lineas.push(`Relleno: ${draft.relleno}`)
 
   const fechaLabel = formatFechaEntrega(draft.fechaEntrega)
-  if (fechaLabel) lineas.push(`Fecha estimada de entrega: ${fechaLabel}`)
+  if (fechaLabel) {
+    lineas.push(
+      `Fecha estimada de entrega: ${fechaLabel}${draft.horaEntrega ? `, ${draft.horaEntrega}` : ''}`,
+    )
+  }
 
   if (draft.extras.length > 0) {
     const extrasLabels = draft.extras

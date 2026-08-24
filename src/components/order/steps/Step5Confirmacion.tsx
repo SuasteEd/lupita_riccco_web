@@ -137,6 +137,7 @@ export function Step5Confirmacion({
           <Row label="Dirección" value={draft.direccion} />
           {draft.email && <Row label="Correo" value={draft.email} />}
           <Row label="Fecha de entrega" value={draft.fechaEntrega} />
+          <Row label="Hora de entrega" value={draft.horaEntrega} />
           {draft.comentarios && <Row label="Comentarios" value={draft.comentarios} />}
         </div>
       </div>

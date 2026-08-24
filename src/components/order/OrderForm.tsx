@@ -61,6 +61,7 @@ function canAdvance(step: number, draft: OrderDraft, config: BusinessRulesConfig
         isValidPhone(draft.telefono, draft.telefonoPais) &&
         draft.fechaEntrega.length > 0 &&
         draft.fechaEntrega >= toDateInputValue(fechaMinimaEntrega(config, draft.esPisos)) &&
+        draft.horaEntrega.length > 0 &&
         isEmailValid(draft.email)
       )
     default:

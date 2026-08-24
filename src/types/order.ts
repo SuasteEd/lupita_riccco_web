@@ -33,6 +33,7 @@ export interface OrderDraft {
   direccion: string
   email: string
   fechaEntrega: string // yyyy-mm-dd desde <input type="date">
+  horaEntrega: string // HH:mm, ver DELIVERY_TIME_SLOTS
   comentarios: string
   /** Honeypot: un bot que llena todos los campos ocultos delata que no es humano. */
   honeypot: string
@@ -55,6 +56,7 @@ export const EMPTY_ORDER_DRAFT: OrderDraft = {
   direccion: '',
   email: '',
   fechaEntrega: '',
+  horaEntrega: '',
   comentarios: '',
   honeypot: '',
 }
