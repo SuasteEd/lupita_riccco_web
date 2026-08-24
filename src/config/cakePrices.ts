@@ -19,12 +19,10 @@ export async function loadCakePrices(): Promise<CakePricesDocument | null> {
     const docRef = doc(db, 'cake_prices', 'current')
     const snap = await getDoc(docRef)
     if (!snap.exists()) {
-      console.warn('[cakePrices] cake_prices/current no existe')
       return null
     }
     return snap.data() as CakePricesDocument
-  } catch (error) {
-    console.error('[cakePrices] Error leyendo cake_prices:', error)
+  } catch {
     return null
   }
 }

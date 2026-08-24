@@ -62,12 +62,10 @@ export async function loadBusinessRules(): Promise<BusinessRulesConfig> {
     const docRef = doc(db, 'business_rules', 'current')
     const snap = await getDoc(docRef)
     if (!snap.exists()) {
-      console.warn('[cakeRules] business_rules/current no existe — usando DEFAULT_CONFIG')
       return DEFAULT_CONFIG
     }
     return snap.data() as BusinessRulesConfig
-  } catch (error) {
-    console.error('[cakeRules] Error leyendo business_rules:', error)
+  } catch {
     return DEFAULT_CONFIG
   }
 }

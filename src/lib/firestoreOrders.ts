@@ -29,6 +29,7 @@ export async function submitOrder(
   if (!draft.nombre.trim()) throw new Error('Falta el nombre.')
   if (!draft.direccion.trim()) throw new Error('Falta la dirección.')
   if (!draft.fechaEntrega) throw new Error('Falta la fecha de entrega.')
+  if (!draft.horaEntrega) throw new Error('Falta el horario de entrega.')
   // El botón "Enviar solicitud" ya está disabled sin esto marcado — esta
   // validación es solo defensa extra, igual que las de arriba.
   if (!termsAccepted) throw new Error('Falta aceptar los términos y la política de privacidad.')
@@ -68,7 +69,7 @@ export async function submitOrder(
     empaque: { tipo: draft.empaqueTipo },
     extras: draft.extras,
     imagenReferencia,
-    fechaEntrega: Timestamp.fromDate(new Date(`${draft.fechaEntrega}T12:00:00`)),
+    fechaEntrega: Timestamp.fromDate(new Date(`${draft.fechaEntrega}T${draft.horaEntrega}:00`)),
     comentarios: draft.comentarios.trim() || null,
     precioEstimado: estimate.total,
     desglosePrecio:
@@ -89,6 +90,15 @@ export async function submitOrder(
     notaAdmin: null,
     fechaResolucion: null,
   })
+
+  // Fire-and-forget: el push al staff nunca debe bloquear ni romper el
+  // flujo de éxito del wizard si falla (red, función caída, etc.) — el
+  // pedido ya quedó guardado, que es lo único que debe garantizar submitOrder.
+  fetch('/.netlify/functions/notify-new-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ orderId: docRef.id }),
+  }).catch(() => {})
 
   return docRef.id
 }

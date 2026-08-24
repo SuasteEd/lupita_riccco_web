@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { Component, type ReactNode } from 'react'
 import { ArrowClockwiseIcon } from '@phosphor-icons/react'
 
 interface Props {
@@ -27,10 +27,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(): State {
     return { hasError: true }
-  }
-
-  componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[ErrorBoundary]', error, info)
   }
 
   handleRetry = (): void => {

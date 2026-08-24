@@ -1,6 +1,7 @@
 import { fechaMinimaEntrega, formatFechaMinima } from '../../../config/cakeRules'
 import { useBusinessRules } from '../../../context/BusinessRulesContext'
 import { toDateInputValue } from '../../../lib/date'
+import { DELIVERY_TIME_SLOTS } from '../../../lib/deliveryTimeSlots'
 import { isValidPhone, PHONE_COUNTRIES, type PhoneCountry } from '../../../lib/phone'
 import type { OrderDraft } from '../../../types/order'
 import { Field, Select, Textarea, TextInput } from '../fields'
@@ -27,6 +28,7 @@ export function Step4ContactoFecha({
     showErrors && (!draft.fechaEntrega || draft.fechaEntrega < minDateValue)
       ? `Elige una fecha a partir del ${formatFechaMinima(config, draft.esPisos)}.`
       : undefined
+  const horaError = showErrors && !draft.horaEntrega ? 'Elige un horario de entrega.' : undefined
   const emailError =
     showErrors && draft.email.trim() && !/^\S+@\S+\.\S+$/.test(draft.email.trim())
       ? 'Ese correo no se ve válido.'
@@ -119,6 +121,22 @@ export function Step4ContactoFecha({
           onChange={(e) => update({ fechaEntrega: e.target.value })}
           error={fechaError}
         />
+      </Field>
+
+      <Field label="Hora de entrega" htmlFor="hora" error={horaError}>
+        <Select
+          id="hora"
+          value={draft.horaEntrega}
+          onChange={(e) => update({ horaEntrega: e.target.value })}
+          error={horaError}
+        >
+          <option value="">Selecciona un horario</option>
+          {DELIVERY_TIME_SLOTS.map((hora) => (
+            <option key={hora} value={hora}>
+              {hora}
+            </option>
+          ))}
+        </Select>
       </Field>
 
       <Field label="Comentarios (opcional)" htmlFor="comentarios">
